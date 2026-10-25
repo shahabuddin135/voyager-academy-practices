@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PC Control Agent — Harness Engineering Visual Lab</title>
+<style>
+  :root{
+    --bg:#071018;
+    --panel:#0d1822;
+    --panel2:#101f2b;
+    --text:#edf6f7;
+    --muted:#91a8b3;
+    --line:#243744;
+    --cyan:#50e3c2;
+    --blue:#67a7ff;
+    --gold:#f6c453;
+    --red:#ff7272;
+    --green:#68dd91;
+    --purple:#bd8cff;
+    --shadow:0 24px 70px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 10% 0%,rgba(80,227,194,.10),transparent 25%),
+      radial-gradient(circle at 90% 10%,rgba(103,167,255,.12),transparent 27%),
+      var(--bg);
+    color:var(--text);
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    line-height:1.55;
+  }
+  button,input{font:inherit}
+  .shell{max-width:1480px;margin:auto;padding:28px}
+  .hero{
+    padding:38px;
+    border:1px solid var(--line);
+    border-radius:28px;
+    background:linear-gradient(145deg,rgba(16,31,43,.96),rgba(8,19,28,.94));
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    position:relative;
+  }
+  .hero:after{
+    content:"";
+    position:absolute;inset:auto -140px -180px auto;width:430px;height:430px;
+    border-radius:50%;background:rgba(80,227,194,.08);filter:blur(10px)
+  }
+  .eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);font-weight:800}
+  h1{font-size:clamp(34px,5vw,68px);line-height:1.02;margin:12px 0 16px;max-width:1000px}
+  .lead{font-size:18px;color:#bed0d6;max-width:960px;margin:0}
+  .hero-grid{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end}
+  .mission{
+    min-width:290px;padding:18px;border:1px solid #2a4350;background:#09141d;border-radius:18px;
+  }
+  .mission strong{display:block;font-size:15px;margin-bottom:8px;color:var(--gold)}
+  .mission span{color:#c3d2d7;font-size:14px}
+  .tabs{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0}
+  .tab{
+    border:1px solid var(--line);background:#0b151e;color:#c4d4d9;padding:10px 15px;border-radius:999px;
+    cursor:pointer;font-weight:700
+  }
+  .tab.active{background:var(--text);color:#071018;border-color:var(--text)}
+  .section{margin-top:26px;border:1px solid var(--line);border-radius:26px;background:rgba(13,24,34,.92);box-shadow:var(--shadow)}
+  .section-head{padding:26px 28px 10px}
+  .section-head h2{font-size:28px;margin:0 0 8px}
+  .section-head p{margin:0;color:var(--muted)}
+  .content{padding:20px 28px 30px}
+  .hidden{display:none!important}
+
+  /* architecture */
+  .architecture{
+    display:grid;grid-template-columns:minmax(620px,1.35fr) minmax(330px,.65fr);gap:22px
+  }
+  .loop-frame{
+    border:3px solid var(--blue);border-radius:28px;padding:22px;position:relative;background:rgba(103,167,255,.035)
+  }
+  .loop-label{
+    position:absolute;top:-15px;left:26px;background:var(--blue);color:#06101a;padding:5px 12px;border-radius:999px;font-weight:900
+  }
+  .beat{
+    border:2px dashed #496777;border-radius:22px;padding:20px;margin-top:8px;background:rgba(255,255,255,.015)
+  }
+  .beat-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .beat-title b{font-size:18px}
+  .beat-title span{color:var(--muted);font-size:13px}
+  .pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:11px}
+  .node{
+    min-height:128px;padding:14px;border-radius:17px;border:1px solid var(--line);background:var(--panel2);
+    position:relative;transition:.25s transform,.25s border-color,.25s opacity
+  }
+  .node:hover{transform:translateY(-3px);border-color:#4d6a79}
+  .num{
+    width:30px;height:30px;border-radius:10px;display:grid;place-items:center;font-weight:900;color:#061018;
+    background:var(--cyan);margin-bottom:10px
+  }
+  .node h3{font-size:14px;margin:0 0 6px}
+  .node p{font-size:12px;color:var(--muted);margin:0}
+  .harness-ring{
+    margin-top:15px;border:2px solid var(--cyan);border-radius:22px;padding:16px;background:rgba(80,227,194,.035);
+    position:relative
+  }
+  .harness-label{
+    display:inline-block;background:var(--cyan);color:#061018;padding:5px 11px;border-radius:999px;font-weight:900;margin-bottom:12px
+  }
+  .verbs{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .verb{padding:12px;border:1px solid #2d5353;border-radius:14px;background:#0a1a20}
+  .verb b{display:block;font-size:12px;color:var(--cyan);margin-bottom:4px}
+  .verb span{font-size:11px;color:#a9c1c7}
+  .side-card{border:1px solid var(--line);border-radius:20px;background:#0a141d;padding:20px}
+  .side-card + .side-card{margin-top:16px}
+  .side-card h3{margin:0 0 12px;font-size:17px}
+  .legend-row{display:grid;grid-template-columns:34px 1fr;gap:10px;margin:12px 0;align-items:start}
+  .legend-row i{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-style:normal;font-weight:900;color:#061018}
+  .legend-row b{display:block;font-size:13px}
+  .legend-row span{font-size:12px;color:var(--muted)}
+  .arrow{
+    text-align:center;color:var(--gold);font-size:25px;line-height:1;margin:8px 0
+  }
+
+  /* simulator */
+  .sim-grid{display:grid;grid-template-columns:360px 1fr;gap:22px}
+  .controls{border:1px solid var(--line);border-radius:20px;padding:20px;background:#0a141d}
+  .control{margin-bottom:18px}
+  .control label{display:flex;justify-content:space-between;font-size:13px;font-weight:800;margin-bottom:7px}
+  .control small{display:block;color:var(--muted);margin-top:5px}
+  input[type="range"]{width:100%;accent-color:var(--cyan)}
+  .toggle-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid #1d303b}
+  .switch{position:relative;width:46px;height:25px}
+  .switch input{display:none}
+  .slider{position:absolute;inset:0;background:#273944;border-radius:999px;cursor:pointer}
+  .slider:before{content:"";position:absolute;width:19px;height:19px;left:3px;top:3px;border-radius:50%;background:#dce8eb;transition:.2s}
+  .switch input:checked + .slider{background:var(--cyan)}
+  .switch input:checked + .slider:before{transform:translateX(21px);background:#061018}
+  .dashboard{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+  .metric{padding:17px;border:1px solid var(--line);border-radius:17px;background:var(--panel2)}
+  .metric span{font-size:12px;color:var(--muted)}
+  .metric strong{display:block;font-size:29px;margin-top:5px}
+  .status-panel{margin-top:13px;border:1px solid var(--line);border-radius:20px;padding:20px;background:#0a141d}
+  .status-line{display:flex;justify-content:space-between;gap:20px;align-items:center}
+  .status-badge{padding:8px 13px;border-radius:999px;font-size:12px;font-weight:900}
+  .bar{height:13px;background:#1b2a33;border-radius:999px;overflow:hidden;margin:15px 0}
+  .bar > div{height:100%;width:50%;background:linear-gradient(90deg,var(--red),var(--gold),var(--green));transition:.25s}
+  .run-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+  .run-step{padding:12px;border:1px solid var(--line);border-radius:14px;font-size:12px;color:#bdd0d5}
+  .run-step.off{opacity:.35;text-decoration:line-through}
+  .note{font-size:12px;color:var(--muted);margin-top:12px}
+
+  /* concept cards */
+  .concept-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .concept{
+    border:1px solid var(--line);border-radius:21px;background:linear-gradient(150deg,#10202b,#09141d);
+    padding:20px;min-height:330px;display:flex;flex-direction:column
+  }
+  .concept-top{display:flex;gap:11px;align-items:flex-start}
+  .concept-no{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--purple);color:#0b1017;font-weight:900;flex:none}
+  .concept h3{margin:0;font-size:18px;line-height:1.2}
+  .vs{font-size:12px;color:var(--purple);font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
+  .plain{margin:15px 0;color:#d6e3e6;font-size:14px}
+  .scenario{border-left:3px solid var(--gold);padding:10px 12px;background:rgba(246,196,83,.055);font-size:13px;color:#c8d6da}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:auto;padding-top:16px}
+  .mini{padding:11px;border:1px solid var(--line);border-radius:13px;background:#0a151e}
+  .mini b{display:block;font-size:12px;margin-bottom:5px}
+  .mini span{font-size:11px;color:var(--muted)}
+  .trap{margin-top:10px;color:var(--red);font-size:12px;font-weight:800}
+
+  /* sequence */
+  .timeline{position:relative;padding-left:23px}
+  .timeline:before{content:"";position:absolute;left:15px;top:15px;bottom:15px;width:2px;background:#29414e}
+  .phase{position:relative;margin:0 0 15px 22px;padding:17px;border:1px solid var(--line);border-radius:17px;background:#0a151e}
+  .phase:before{content:"";position:absolute;width:14px;height:14px;left:-31px;top:23px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 6px #0d1822}
+  .phase header{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}
+  .phase h3{margin:0 0 5px;font-size:16px}
+  .phase .problem{color:var(--red);font-size:12px;font-weight:800}
+  .phase .fix{color:var(--green);font-size:12px;font-weight:800}
+  .phase p{margin:8px 0 0;color:#b8cbd0;font-size:13px}
+  .score{white-space:nowrap;padding:6px 10px;border-radius:999px;background:#13232e;color:var(--gold);font-weight:900;font-size:12px}
+  .footer{padding:28px 0 12px;color:#728993;font-size:12px;text-align:center}
+  .kbd{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;padding:2px 6px;border:1px solid #35505e;border-radius:6px;background:#08131b;color:#dce9ec}
+  @media(max-width:1100px){
+    .architecture,.sim-grid{grid-template-columns:1fr}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .verbs{grid-template-columns:repeat(2,1fr)}
+    .concept-grid{grid-template-columns:repeat(2,1fr)}
+  }
+  @media(max-width:720px){
+    .shell{padding:14px}.hero{padding:24px}.hero-grid{grid-template-columns:1fr}
+    .pipeline,.verbs,.dashboard,.concept-grid,.run-list{grid-template-columns:1fr}
+    .content,.section-head{padding-left:18px;padding-right:18px}
+    .two-col{grid-template-columns:1fr}
+  }
+  @media print{
+    body{background:white;color:#111}.shell{max-width:none}.section,.hero,.concept,.phase,.side-card,.controls,.status-panel,.metric,.node,.verb{box-shadow:none;background:white;color:#111}
+    .tabs,.controls{display:none}.architecture,.sim-grid{grid-template-columns:1fr}.hidden{display:block!important}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Harness Engineering Visual Lab</div>
+        <h1>Build a PC Control Agent without giving it uncontrolled power.</h1>
+        <p class="lead">
+          One evolving scenario: the agent checks disk space, sorts Downloads, backs up project folders,
+          installs approved updates, and reports what it changed. Each failure forces a new engineering layer.
+        </p>
+      </div>
+      <div class="mission">
+        <strong>Mission: “Prepare my PC for tomorrow’s class.”</strong>
+        <span>Free 15 GB, back up <span class="kbd">D:\Projects</span>, update approved apps, never touch secrets or personal photos, and finish before 7:00 AM.</span>
+      </div>
+    </div>
+  </section>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="map">1. System Map</button>
+    <button class="tab" data-tab="sim">2. Reliability Simulator</button>
+    <button class="tab" data-tab="concepts">3. Concept Redefinitions</button>
+    <button class="tab" data-tab="growth">4. Build Sequence</button>
+  </nav>
+
+  <section id="map" class="section tabpane">
+    <div class="section-head">
+      <h2>The whole system, numbered</h2>
+      <p>The blue frame is the repeating loop. The green frame is the harness controlling work inside one beat.</p>
+    </div>
+    <div class="content architecture">
+      <div class="loop-frame">
+        <div class="loop-label">LOOP — controls repetition</div>
+        <div class="beat">
+          <div class="beat-title">
+            <b>One beat: one complete PC-maintenance run</b>
+            <span>Start → act → judge → remember → stop/repeat</span>
+          </div>
+          <div class="pipeline">
+            <article class="node"><div class="num">1</div><h3>Heartbeat starts</h3><p>6:00 AM schedule, an event, or “run until 15 GB is free.”</p></article>
+            <article class="node"><div class="num">2</div><h3>Load state spine</h3><p>Read what was done, what failed, and what still needs work.</p></article>
+            <article class="node"><div class="num">3</div><h3>Maker plans work</h3><p>Choose safe actions: archive logs, move installers, back up projects.</p></article>
+            <article class="node"><div class="num">4</div><h3>Harness controls actions</h3><p>Every tool call passes permissions, scope, checks, and logging.</p></article>
+            <article class="node"><div class="num">5</div><h3>Checker returns verdict</h3><p>Typed PASS, FAIL, or HUMAN_REQUIRED with evidence.</p></article>
+          </div>
+          <div class="arrow">↓</div>
+          <div class="pipeline">
+            <article class="node"><div class="num">6</div><h3>Compare policy</h3><p>Did this beat meet the bar? Did quality fall below baseline?</p></article>
+            <article class="node"><div class="num">7</div><h3>Commit or roll back</h3><p>Keep verified changes; restore the checkpoint after bad work.</p></article>
+            <article class="node"><div class="num">8</div><h3>Escalate risk</h3><p>Deleting photos, changing drivers, or unclear findings require you.</p></article>
+            <article class="node"><div class="num">9</div><h3>Update state spine</h3><p>Record freed space, backups, failures, and the next safe task.</p></article>
+            <article class="node"><div class="num">10</div><h3>Stopping condition</h3><p>Stop when goals pass, retry within a cap, or wait for the next beat.</p></article>
+          </div>
+          <div class="harness-ring">
+            <span class="harness-label">HARNESS — controls each action inside Step 4</span>
+            <div class="verbs">
+              <div class="verb"><b>1 · CONSTRAIN</b><span>Allow temp cleanup. Ask before installs. Deny secrets and photos.</span></div>
+              <div class="verb"><b>2 · INFORM</b><span>Give folder map, app policy, backup rules, and tool descriptions.</span></div>
+              <div class="verb"><b>3 · VERIFY</b><span>Check hashes, free-space result, backup integrity, and exit codes.</span></div>
+              <div class="verb"><b>4 · CORRECT</b><span>Roll back, retry safely, and turn repeated failure into a new rule.</span></div>
+              <div class="verb"><b>5 · ESCALATE</b><span>Stop and ask a person when risk or uncertainty exceeds policy.</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <aside>
+        <div class="side-card">
+          <h3>Do not mix these layers</h3>
+          <div class="legend-row"><i style="background:var(--blue)">L</i><div><b>Loop question</b><span>What starts the work, what repeats, what survives, and what stops it?</span></div></div>
+          <div class="legend-row"><i style="background:var(--cyan)">H</i><div><b>Harness question</b><span>For this action, what may the model do, what does it know, how is it checked, and what happens on failure?</span></div></div>
+        </div>
+        <div class="side-card">
+          <h3>Concrete example</h3>
+          <p style="color:var(--muted);font-size:13px;margin:0">
+            The <b>loop</b> decides to run every morning until the PC has 15 GB free.
+            The <b>harness</b> decides that deleting <span class="kbd">Temp</span> is allowed,
+            uninstalling software needs approval, and opening <span class="kbd">.env</span> is denied.
+          </p>
+        </div>
+        <div class="side-card">
+          <h3>One-line memory</h3>
+          <p style="font-size:17px;margin:0"><b>Loop = when and how work continues.</b><br><b>Harness = how each action stays useful and safe.</b></p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="sim" class="section tabpane hidden">
+    <div class="section-head">
+      <h2>Interactive reliability simulator</h2>
+      <p>Change the run length and harness parts. The numbers are a learning model, not production guarantees.</p>
+    </div>
+    <div class="content sim-grid">
+      <div class="controls">
+        <div class="control">
+          <label><span>Actions in one beat</span><b id="actionsVal">12</b></label>
+          <input id="actions" type="range" min="1" max="30" value="12">
+          <small>Examples: scan folders, calculate size, move file, hash backup, install update.</small>
+        </div>
+        <div class="control">
+          <label><span>Reliability per action</span><b id="reliabilityVal">95%</b></label>
+          <input id="reliability" type="range" min="80" max="99" value="95">
+          <small>A long chain compounds small failure chances.</small>
+        </div>
+        <div class="toggle-row"><span>Mechanical guardrails</span><label class="switch"><input id="guardrails" type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="toggle-row"><span>Maker–checker</span><label class="switch"><input id="checker" type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="toggle-row"><span>Typed checker output</span><label class="switch"><input id="typed" type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="toggle-row"><span>State spine</span><label class="switch"><input id="spine" type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="toggle-row"><span>Worktree / sandbox</span><label class="switch"><input id="isolation" type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="toggle-row"><span>Golden-set evals</span><label class="switch"><input id="evals" type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="toggle-row"><span>Remote runtime</span><label class="switch"><input id="runtime" type="checkbox"><span class="slider"></span></label></div>
+      </div>
+
+      <div>
+        <div class="dashboard">
+          <div class="metric"><span>Bare clean-run chance</span><strong id="bare">54%</strong></div>
+          <div class="metric"><span>Harness readiness</span><strong id="readiness">86</strong></div>
+          <div class="metric"><span>Blast radius</span><strong id="blast">Low</strong></div>
+          <div class="metric"><span>Continuity</span><strong id="continuity">Local</strong></div>
+        </div>
+        <div class="status-panel">
+          <div class="status-line">
+            <div><b style="font-size:18px">Autonomy decision</b><div id="statusText" style="color:var(--muted);font-size:13px;margin-top:4px"></div></div>
+            <span id="statusBadge" class="status-badge">SUPERVISED</span>
+          </div>
+          <div class="bar"><div id="readinessBar"></div></div>
+          <div class="run-list">
+            <div id="stepGuard" class="run-step">1. Tool call is checked against allow / ask / deny policy.</div>
+            <div id="stepIsolation" class="run-step">2. Changes happen in a safe working area, not directly on live files.</div>
+            <div id="stepChecker" class="run-step">3. A separate checker judges evidence, not the maker’s confidence.</div>
+            <div id="stepTyped" class="run-step">4. Verdict is parsed as PASS / FAIL / HUMAN_REQUIRED.</div>
+            <div id="stepSpine" class="run-step">5. Results survive the session and guide the next beat.</div>
+            <div id="stepEvals" class="run-step">6. Scheduled evals detect regression or model drift.</div>
+            <div id="stepRuntime" class="run-step">7. Remote runtime can keep the schedule alive with the laptop off.</div>
+            <div class="run-step">8. Runtime does not improve the plan, policy, or checker.</div>
+          </div>
+          <div class="note">Formula shown for the bare chain: <span class="kbd">per-action reliability ^ number of actions</span>. Harness readiness is an educational weighted score.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="concepts" class="section tabpane hidden">
+    <div class="section-head">
+      <h2>Nine concepts, rebuilt in the PC-control scenario</h2>
+      <p>Each card separates two ideas that solve different engineering problems.</p>
+    </div>
+    <div class="content concept-grid">
+      <article class="concept">
+        <div class="concept-top"><div class="concept-no">1</div><div><h3>Harness vs Loop</h3><div class="vs">Action control vs work cycle</div></div></div>
+        <p class="plain"><b>Harness:</b> the rules and mechanisms around each model action. <b>Loop:</b> the structure that starts a beat, repeats work, remembers state, and decides when to stop.</p>
+        <div class="scenario">At 6:00 AM, the <b>loop</b> starts. Before deleting a temp file, the <b>harness</b> checks folder scope, permission, and verification.</div>
+        <div class="two-col"><div class="mini"><b>Loop owns</b><span>Heartbeat, beat, retries, spine, stopping condition.</span></div><div class="mini"><b>Harness owns</b><span>Tools, context, permissions, checks, logs, rollback.</span></div></div>
+        <div class="trap">Exam trap: a deny rule is not a heartbeat; a schedule is not a guardrail.</div>
+      </article>
+
+      <article class="concept">
+        <div class="concept-top"><div class="concept-no">2</div><div><h3>Prompt Rule vs Guardrail</h3><div class="vs">Advice vs enforcement</div></div></div>
+        <p class="plain"><b>Prompt rule:</b> “Never open personal photos.” It guides the model. <b>Guardrail:</b> the photo folder is outside the tool’s allowed paths. The action cannot run.</p>
+        <div class="scenario">The agent gets confused by a folder name. A prompt may be ignored; a file-system deny rule blocks access anyway.</div>
+        <div class="two-col"><div class="mini"><b>Rule</b><span>Useful for judgment and project habits.</span></div><div class="mini"><b>Guardrail</b><span>Used when the cost of failure is too high for words alone.</span></div></div>
+        <div class="trap">Test: Can the model disobey it? If yes, it is guidance, not a hard guardrail.</div>
+      </article>
+
+      <article class="concept">
+        <div class="concept-top"><div class="concept-no">3</div><div><h3>State Spine vs Account Spine</h3><div class="vs">Owned task memory vs vendor continuity</div></div></div>
+        <p class="plain"><b>State spine:</b> your repo file or database recording task state. <b>Account spine:</b> sessions and files saved by a hosted agent service across devices.</p>
+        <div class="scenario"><span class="kbd">pc-maintenance-state.json</span> says backup 4/7 finished. A cloud agent account also remembers the chat and files, even on your phone.</div>
+        <div class="two-col"><div class="mini"><b>State spine</b><span>Portable, versioned, designed by you, tied to the job.</span></div><div class="mini"><b>Account spine</b><span>Convenient, vendor-hosted, tied to the account and platform.</span></div></div>
+        <div class="trap">The account spine can store continuity, but it is not automatically your governed System of Record.</div>
+      </article>
+
+      <article class="concept">
+        <div class="concept-top"><div class="concept-no">4</div><div><h3>Maker–Checker vs Worktree Split</h3><div class="vs">Trust separation vs edit isolation</div></div></div>
+        <p class="plain"><b>Maker–checker:</b> one actor changes, another judges. <b>Worktree split:</b> separate working folders stop parallel agents from changing the same files.</p>
+        <div class="scenario">Agent A prepares an app-update script. Agent B checks it. A separate worktree keeps that experiment away from the live automation files.</div>
+        <div class="two-col"><div class="mini"><b>Maker–checker solves</b><span>“Can we trust this work?”</span></div><div class="mini"><b>Worktree solves</b><span>“Will two workers collide?”</span></div></div>
+        <div class="trap">Isolation does not prove quality. Review does not stop file collisions.</div>
+      </article>
+
+      <article class="concept">
+        <div class="concept-top"><div class="concept-no">5</div><div><h3>Typed Output vs Prose Verdict</h3><div class="vs">Machine branch vs human interpretation</div></div></div>
+        <p class="plain"><b>Prose:</b> “Looks mostly fine, though the backup may need attention.” <b>Typed:</b> <span class="kbd">{"verdict":"HUMAN_REQUIRED","risk":"high"}</span>.</p>
+        <div class="scenario">The loop must decide whether to commit, retry, or alert you. It cannot safely branch on vague language.</div>
+        <div class="two-col"><div class="mini"><b>Typed output gives</b><span>Schema validation, safe branching, clear missing fields.</span></div><div class="mini"><b>Prose gives</b><span>Explanation for people, but weak control for code.</span></div></div>
+        <div class="trap">Best pattern: typed decision fields plus a human-readable reason.</div>
+      </article>
+
+      <article class="concept">
+        <div class="concept-top"><div class="concept-no">6</div><div><h3>Bar vs Baseline</h3><div class="vs">Pass policy vs recorded reference</div></div></div>
+        <p class="plain"><b>Bar:</b> the minimum you choose. <b>Baseline:</b> the measured result from a known version, model, rubric, and date.</p>
+        <div class="scenario">Safety bar: 100% on “never touch protected folders.” Baseline: version 1.4 passed 47 of 50 total eval cases last Friday.</div>
+        <div class="two-col"><div class="mini"><b>Bar asks</b><span>“Is this acceptable?”</span></div><div class="mini"><b>Baseline asks</b><span>“Did this get better or worse than before?”</span></div></div>
+        <div class="trap">Do not move the bar to match a bad score. Do not treat the baseline as the moral definition of good.</div>
+      </article>
+
+      <article class="concept">
+        <div class="concept-top"><div class="concept-no">7</div><div><h3>Drift vs Regression</h3><div class="vs">External behavior change vs local breakage</div></div></div>
+        <p class="plain"><b>Regression:</b> your prompt, code, rule, or tool change made results worse. <b>Drift:</b> behavior changed although your local system stayed the same.</p>
+        <div class="scenario">After you edit the cleanup policy, protected-folder accuracy drops: regression. Nothing changes locally, but a hosted model update causes the drop: drift.</div>
+        <div class="two-col"><div class="mini"><b>Catch regression</b><span>Run evals on every harness change.</span></div><div class="mini"><b>Catch drift</b><span>Run the same evals on a schedule.</span></div></div>
+        <div class="trap">A green CI run after your last commit cannot detect a model change that happens next week.</div>
+      </article>
+
+      <article class="concept">
+        <div class="concept-top"><div class="concept-no">8</div><div><h3>Runtime Home vs Quality</h3><div class="vs">Availability vs correctness</div></div></div>
+        <p class="plain"><b>Runtime home:</b> where the process stays alive. <b>Quality:</b> whether its spec, tools, policy, checker, and evals produce good work.</p>
+        <div class="scenario">Moving the 6:00 AM beat to a server means it runs while your PC is off. It does not fix a checker that approves broken backups.</div>
+        <div class="two-col"><div class="mini"><b>Runtime improves</b><span>Uptime, scheduling, remote access, recovery ownership.</span></div><div class="mini"><b>Harness improves</b><span>Safety, evidence, repeatability, correction, escalation.</span></div></div>
+        <div class="trap">Cloud execution can make a bad agent fail more reliably and more often.</div>
+      </article>
+
+      <article class="concept">
+        <div class="concept-top"><div class="concept-no">9</div><div><h3>Vertical vs Narrow Agent</h3><div class="vs">Governed business domain vs one worker</div></div></div>
+        <p class="plain"><b>Narrow agent:</b> one Digital FTE with one job. <b>Vertical:</b> the governed domain system that can manufacture many related workers.</p>
+        <div class="scenario">“PC Backup Agent” is narrow. A “Managed IT Operations” vertical contains policy, corpus, expert knowledge, tools, evals, and workers for backup, patching, inventory, and incident triage.</div>
+        <div class="two-col"><div class="mini"><b>Narrow agent</b><span>One outcome and one operating role.</span></div><div class="mini"><b>Vertical</b><span>Reusable domain base for many workers and customers.</span></div></div>
+        <div class="trap">A collection of documents is not a working vertical without committed domain expertise and governance.</div>
+      </article>
+    </div>
+  </section>
+
+  <section id="growth" class="section tabpane hidden">
+    <div class="section-head">
+      <h2>How the PC agent grows into a harness</h2>
+      <p>Every stage begins with a real failure. The fix becomes a permanent system layer.</p>
+    </div>
+    <div class="content timeline">
+      <article class="phase"><header><div><h3>Stage 0 — Bare LLM</h3><span class="problem">Problem: it can explain actions but cannot safely perform them.</span></div><span class="score">Control 05/100</span></header><p>Add OS tools for reading disk space and listing files. The model is now useful, but its power has grown faster than its safety.</p></article>
+      <article class="phase"><header><div><h3>Stage 1 — Tool-using agent</h3><span class="problem">Problem: it can call a delete command on the wrong path.</span></div><span class="score">Control 18/100</span></header><p><span class="fix">Fix:</span> add allow / ask / deny permissions and path scope. Protected folders become mechanically unreachable.</p></article>
+      <article class="phase"><header><div><h3>Stage 2 — Informed agent</h3><span class="problem">Problem: safe actions can still be stupid because the model lacks PC policy.</span></div><span class="score">Control 32/100</span></header><p><span class="fix">Fix:</span> add a short rules file, folder map, app-update policy, backup procedure, and precise tool descriptions.</p></article>
+      <article class="phase"><header><div><h3>Stage 3 — Verified actions</h3><span class="problem">Problem: “backup complete” may be false.</span></div><span class="score">Control 49/100</span></header><p><span class="fix">Fix:</span> require hashes, file counts, exit codes, and free-space measurements. Done becomes a test, not a sentence.</p></article>
+      <article class="phase"><header><div><h3>Stage 4 — Maker–checker</h3><span class="problem">Problem: the same agent that acted can rationalize its own mistake.</span></div><span class="score">Control 62/100</span></header><p><span class="fix">Fix:</span> a separate checker reviews the plan, tool log, and evidence. Only its verdict can move the loop forward.</p></article>
+      <article class="phase"><header><div><h3>Stage 5 — Typed verdicts</h3><span class="problem">Problem: prose review cannot drive safe automatic branching.</span></div><span class="score">Control 70/100</span></header><p><span class="fix">Fix:</span> use a schema with verdict, risk, evidence, failed_checks, and required_human_action.</p></article>
+      <article class="phase"><header><div><h3>Stage 6 — Checkpoints and correction</h3><span class="problem">Problem: partial failure leaves the PC in an uncertain state.</span></div><span class="score">Control 78/100</span></header><p><span class="fix">Fix:</span> create restore points, backup manifests, and staged changes. Roll back, classify the failure, then add a permanent harness rule.</p></article>
+      <article class="phase"><header><div><h3>Stage 7 — Loop and state spine</h3><span class="problem">Problem: each new session forgets the previous run.</span></div><span class="score">Control 84/100</span></header><p><span class="fix">Fix:</span> add heartbeat, beat, capped retries, stopping condition, and a state file read first and updated last.</p></article>
+      <article class="phase"><header><div><h3>Stage 8 — Evals, bars, and baseline</h3><span class="problem">Problem: one successful morning does not prove stable quality.</span></div><span class="score">Control 91/100</span></header><p><span class="fix">Fix:</span> build a golden set: protected folders, locked files, low disk, failed network, corrupt backup, injection in filenames. Set category bars and record a baseline.</p></article>
+      <article class="phase"><header><div><h3>Stage 9 — Runtime migration</h3><span class="problem">Problem: the loop misses 6:00 AM when the laptop is closed.</span></div><span class="score">Control 91/100 + uptime</span></header><p><span class="fix">Fix:</span> move the clock and worker to a reliable runtime. Re-run evals there. Quality does not rise merely because uptime rises.</p></article>
+      <article class="phase"><header><div><h3>Stage 10 — Vertical tuning</h3><span class="problem">Problem: one PC agent is useful but not yet a repeatable business system.</span></div><span class="score">Reusable domain</span></header><p><span class="fix">Fix:</span> work with an IT domain expert, build a governed corpus and policy base, then manufacture narrow workers for backup, updates, inventory, and incident triage.</p></article>
+    </div>
+  </section>
+
+  <div class="footer">
+    Study visualizer for the GIAIC Agent Factory syllabus. Numerical scores and simulator weights are teaching aids, not official exam scoring or production safety claims.
+  </div>
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const panes = document.querySelectorAll('.tabpane');
+  tabs.forEach(btn => btn.addEventListener('click', () => {
+    tabs.forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+    panes.forEach(p=>p.classList.add('hidden'));
+    document.getElementById(btn.dataset.tab).classList.remove('hidden');
+    window.scrollTo({top:document.querySelector('.tabs').offsetTop-10,behavior:'smooth'});
+  }));
+
+  const ids = ['actions','reliability','guardrails','checker','typed','spine','isolation','evals','runtime'];
+  ids.forEach(id=>document.getElementById(id).addEventListener('input',update));
+
+  function on(id){ return document.getElementById(id).checked; }
+  function pct(x){ return Math.round(x*100)+'%'; }
+
+  function update(){
+    const actions = +document.getElementById('actions').value;
+    const rel = +document.getElementById('reliability').value/100;
+    const bare = Math.pow(rel,actions);
+
+    document.getElementById('actionsVal').textContent=actions;
+    document.getElementById('reliabilityVal').textContent=Math.round(rel*100)+'%';
+    document.getElementById('bare').textContent=pct(bare);
+
+    let score = 18 + Math.round(bare*20);
+    score += on('guardrails') ? 17 : 0;
+    score += on('checker') ? 12 : 0;
+    score += on('typed') && on('checker') ? 8 : 0;
+    score += on('spine') ? 8 : 0;
+    score += on('isolation') ? 8 : 0;
+    score += on('evals') ? 9 : 0;
+    score = Math.min(100,score);
+
+    document.getElementById('readiness').textContent=score;
+    document.getElementById('readinessBar').style.width=score+'%';
+
+    let blast = !on('guardrails') ? 'High' : (!on('isolation') ? 'Medium' : 'Low');
+    document.getElementById('blast').textContent=blast;
+    document.getElementById('continuity').textContent=on('runtime') ? 'Remote' : (on('spine') ? 'Local' : 'Fragile');
+
+    const rows = {
+      stepGuard:on('guardrails'), stepIsolation:on('isolation'), stepChecker:on('checker'),
+      stepTyped:on('typed')&&on('checker'), stepSpine:on('spine'), stepEvals:on('evals'), stepRuntime:on('runtime')
+    };
+    Object.entries(rows).forEach(([id,active])=>document.getElementById(id).classList.toggle('off',!active));
+
+    let badge, text, bg, color;
+    if(!on('guardrails')){
+      badge='BLOCKED'; text='No mechanical limits. Do not give this agent write or delete access.';
+      bg='rgba(255,114,114,.16)'; color='var(--red)';
+    } else if(!on('checker') || !on('typed')){
+      badge='SUPERVISED'; text='Actions are bounded, but automatic trust is weak. Keep a person in the gate.';
+      bg='rgba(246,196,83,.16)'; color='var(--gold)';
+    } else if(score >= 84 && on('evals')){
+      badge=on('runtime') ? 'AUTONOMY-READY' : 'LOCAL AUTONOMY';
+      text=on('runtime') ? 'The worker can run unattended, subject to its bars, budget, and human gate.' : 'The design is strong, but the laptop remains the runtime dependency.';
+      bg='rgba(104,221,145,.15)'; color='var(--green)';
+    } else {
+      badge='LIMITED'; text='Use only for low-risk tasks until missing controls are added and measured.';
+      bg='rgba(103,167,255,.15)'; color='var(--blue)';
+    }
+    const el=document.getElementById('statusBadge');
+    el.textContent=badge; el.style.background=bg; el.style.color=color;
+    document.getElementById('statusText').textContent=text;
+  }
+  update();
+</script>
+</body>
+</html>

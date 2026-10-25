@@ -1,0 +1,27 @@
+{
+    "name": "Shahabuddin",
+    "age": 25,
+    "class": "voyagers Academy",
+    "is student": false
+}
+
+
+
+{
+    "temperature_2m": 26.8,
+    "apparent_temperature": 31.7,
+    "relative_humidity_2m": 85,
+    "wind_speed_10m": 8.7,
+}
+
+
+
+
+
+Get request
+
+{
+    "latitude": LATITUDE,
+    "longitude": LONGITUDE,
+    "current": FIELDS,
+}
